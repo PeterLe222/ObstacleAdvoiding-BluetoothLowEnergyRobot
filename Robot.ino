@@ -19,6 +19,8 @@ const int BUTTONPIN = 2;  // pin 2 connects to button
 const int TRIG = A0;  // trig pin of Ultrasonic Sensor
 const int ECHO = A1;  // echo pin of Ultrasonic Sensor
 char state; // variable store the BLE's message receive from sender
+int startPos = 45;  // variable store the start position of servo
+int stopPos = 135;  // variable store the last position of first sweep
 
 boolean debounceButton(boolean state);  // function debounce the button
 void buttonCount(); // function increase the number when the button is pressed
@@ -55,17 +57,27 @@ void loop() {
   /* obstacle avoiding mode */
   if (pressed == 2)
   {
-    // rotate the servo from 45 to 135 degree
-    for (int i = 45; i <= 135; i++)  
+    // rotate the servo from 45 to 135 degree  
+    if (startPos <= 135)
     {
-      servo.write(i); // change the servo degree
+      servo.write(startPos); // change the servo degree
       autoRun();  // robot run automatically to avoid object
+      startPos++;
+      Serial.print("start = ");Serial.println(startPos);
     }
     // rotate the servo from 135 to 45 degree
-    for (int i = 135; i >= 45; i--)
+    else if (stopPos <= 135 && stopPos > 44)
     {
-      servo.write(i);
+      servo.write(stopPos);
       autoRun();
+      stopPos--;
+      Serial.print("stop = ");Serial.println(stopPos);
+    }
+    // reset startPos and stopPos to make a loop
+    else if (startPos == 136 && stopPos == 44)
+    {
+      startPos = 45;
+      stopPos = 135;
     }
   }
 
